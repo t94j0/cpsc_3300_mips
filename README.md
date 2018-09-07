@@ -12,6 +12,7 @@ The MIPS instruction set is covered in your textbook. We will use a subset of th
 
 The instructions you should implement are:
 
+```
 opcode op/funct  action
   ------ --------  ------
   addu   0x00/0x21 r[rd]<-r[rs]+r[rt]
@@ -39,6 +40,7 @@ opcode op/funct  action
   sw     0x2b/n.a. mem[r[rs]+sign_ext(immed)]<-r[rt]
   xor    0x00/0x26 r[rd]<-r[rs]^r[rt]
   xori   0x0e/n.a. r[rt]<-r[rs]^zero_ext(immed)
+```
 
 The instruction classifications are:
 * alu ops: addu, addiu, and, lui, mul, nor, or, sll, slti, sra, srl, subu, xor, xori
