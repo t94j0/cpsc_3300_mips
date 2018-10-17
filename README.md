@@ -1,5 +1,7 @@
 # CPSC 3300: Instruction Set Simulator for MIPS-like Computer 
 
+Due: Sep 25 by 11:59pm
+
 You should program a behavioral simulation of a simple MIPS-like instruction set.
 The MIPS instruction set is covered in your textbook. We will use a subset of the instructions and the same instruction formats. However, there are multiple simplifications:
 
@@ -34,7 +36,7 @@ opcode op/funct  action
   or     0x00/0x25 r[rd]<-r[rs]|r[rt]
   sll    0x00/0x00 r[rd]<-r[rt]<<shamt
   slti   0x0a/n.a. r[rt]<-(signed(r[rs])<sign_ext(immed))?1:0
-  sra    0x00/0x03 r[rd]<-r[rt]>>shamt (sign bit duplicated)
+  sra    0x00/0x03 r[rd] <- r[rt] >> shamt (sign bit duplicated)
   srl    0x00/0x02 r[rd]<-r[rt]>>shamt with zero fill
   subu   0x00/0x23 r[rd]<-r[rs]-r[rt]
   sw     0x2b/n.a. mem[r[rs]+sign_ext(immed)]<-r[rt]
@@ -96,12 +98,10 @@ addr value
 006: 00221823
 007: ac030003
 008: 00000000
-```
 
 behavioral simulation of simple MIPS-like machine
   (all values are shown in hexadecimal)
 
-```
 pc   result of instruction at that location
 000: j     - jump to 0x00000004
 004: lw    - register r[1] now contains 0x00000022
@@ -197,8 +197,8 @@ addr value
 behavioral simulation of simple MIPS-like machine
   (all values are shown in hexadecimal)
 
-pc   result of instruction at that location
 ```
+pc   result of instruction at that location
 000: addiu - register r[3] now contains 0x00000005
 001: addu  - register r[1] now contains 0x00000000
 002: addiu - register r[2] now contains 0x00000001
