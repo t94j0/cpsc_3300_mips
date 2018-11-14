@@ -123,7 +123,7 @@ func slti(m *Machine, inst uint32) {
 func lui(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	_, tu, imm := binary.GetIFormat(inst)
-	val := imm << 16
+	val := cast.ToUint32(imm) << 16
 	printInstruction("lui", tu, uint32(val), m.ir)
 	m.registers[tu] = uint32(val)
 }
