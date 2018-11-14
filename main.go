@@ -1,7 +1,7 @@
 package main
 
 import (
-	machine "./machine"
+	machine "github.com/t94j0/cpsc_3300_mips/machine"
 )
 
 func main() {

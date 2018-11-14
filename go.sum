@@ -1,0 +1,7 @@
+github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/spf13/cast v1.3.0 h1:oget//CVOEoFewqQxwr0Ej5yjygnqGkvggSE/gB35Q8=
+github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
+github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+github.com/t94j0/go-mips-instruction-format v0.0.0-20181013171445-f82594373fb1 h1:RICNQaPx4tki0hoIG+rfRV92GtFw4a6WMkdpHU4z6x4=
+github.com/t94j0/go-mips-instruction-format v0.0.0-20181013171445-f82594373fb1/go.mod h1:RukeuNP6cOb8kFwlptLATbpiOKIi1NKQfGLb7MZmLXA=

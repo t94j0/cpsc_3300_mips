@@ -2,9 +2,10 @@ package machine
 
 import (
 	"fmt"
-	binary "../binary"
 	"io"
 	"os"
+
+	binary "github.com/t94j0/go-mips-instruction-format"
 )
 
 type Machine struct {
@@ -74,10 +75,10 @@ func (m *Machine) PrintInstructionClassCounts() {
 
 	fmt.Println()
 	fmt.Printf(`instruction class counts (omits hlt instruction)
-  alu ops            %3d
-  loads/stores       %3d
-  jumps/branches     %3d
-total                %3d`, m.instructionClass.alu, loadStore, jumpBranch, total)
+  alu ops           %3d
+  loads/stores      %3d
+  jumps/branches    %3d
+total               %3d`, m.instructionClass.alu, loadStore, jumpBranch, total)
 	fmt.Println()
 	fmt.Println()
 }
@@ -88,10 +89,10 @@ func (m *Machine) PrintMemoryAccessCounts() {
 	total := iF + load + store
 
 	fmt.Printf(`memory access counts (omits hlt instruction)
-  inst. fetches       %3d
-  loads               %3d
-  stores              %3d
-total                 %3d`, iF, load, store, total)
+  inst. fetches     %3d
+  loads             %3d
+  stores            %3d
+total               %3d`, iF, load, store, total)
 	fmt.Println()
 	fmt.Println()
 }
@@ -103,11 +104,11 @@ func (m *Machine) PrintTransferControlCounts() {
 	total := j + jal + taken + untaken
 
 	fmt.Printf(`transfer of control counts
-  jumps               %3d
-  jump-and-links      %3d
-  taken branches      %3d
-  untaken branches    %3d
-total                 %3d`, j, jal, taken, untaken, total)
+  jumps             %3d
+  jump-and-links    %3d
+  taken branches    %3d
+  untaken branches  %3d
+total               %3d`, j, jal, taken, untaken, total)
 	fmt.Println()
 }
 
