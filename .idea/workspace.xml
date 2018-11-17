@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e9f4d167-35fa-492b-8413-33fee44932c2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/binary/binary.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/binary/binary_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/machine/instructions.go" beforeDir="false" afterPath="$PROJECT_DIR$/machine/instructions.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/machine/machine.go" beforeDir="false" afterPath="$PROJECT_DIR$/machine/machine.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,7 +21,7 @@
     <session id="-772515853">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="9" />
+          <entry key="project.closed" value="10" />
           <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.11" value="1" />

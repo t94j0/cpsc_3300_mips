@@ -119,6 +119,11 @@ func (m *Machine) PrintBehavorialSimulation() {
 }
 
 func (m *Machine) next() {
+	if m.registers[0] != 0 {
+		fmt.Println("***** - register r[0] not allowed to change; reset to 0")
+		m.registers[0] = 0
+	}
+
 	m.ir = m.pc
 	m.pc++
 }

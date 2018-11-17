@@ -2,6 +2,7 @@ package machine
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/spf13/cast"
 
@@ -21,16 +22,20 @@ var zeroInstructions = map[uint16]InstructionFunc{
 }
 
 func printInstruction(instruction string, register uint16, value, pc uint32) {
-	f := "%03x: %-5s - register r[%d] now contains 0x%08x\n"
+	f := "%03x: %-5s - register r[%x] now contains 0x%08x\n"
 	fmt.Printf(f, pc, instruction, register, value)
 }
 func printJump(ir uint32, instruction string, register uint32) {
-	f := "%03x: %-5s - jump to 0x%08X\n"
+	f := "%03x: %-5s - jump to 0x%08x\n"
 	fmt.Printf(f, ir, instruction, register)
 }
 func printBranch(pc uint32, instruction string, register uint32) {
 	f := "%03x: %-5s - branch taken to 0x%08x\n"
 	fmt.Printf(f, pc, instruction, register)
+}
+func printBranchUntaken(pc uint32, instruction string) {
+	f := "%03x: %-5s - branch untaken\n"
+	fmt.Printf(f, pc, instruction)
 }
 
 func zeroOpcode(m *Machine, inst uint32) {
@@ -56,45 +61,47 @@ func jal(m *Machine, inst uint32) {
 	m.transferControl.jumpLink++
 	dst := binary.GetJFormat(inst)
 	printJump(m.ir, "jal", dst)
-	m.registers[30] = m.pc
+	m.registers[31] = m.pc
 	m.pc = dst
 }
 func bne(m *Machine, inst uint32) {
 	sr, tr, immu := binary.GetIFormat(inst)
-	s, t := m.memory[sr], m.memory[tr]
+	s, t := m.registers[sr], m.registers[tr]
 	if s != t {
 		m.transferControl.takenBranch++
-		loc := int16(m.ir) + int16(immu)
-		printBranch(m.pc, "bne", uint32(loc))
+		loc := int16(m.pc) + cast.ToInt16(immu)
+		printBranch(m.ir, "bne", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
+		printBranchUntaken(m.ir, "bne")
 		m.transferControl.untakenBranch++
 	}
 }
 func blez(m *Machine, inst uint32) {
 	s, _, immu := binary.GetIFormat(inst)
 	val := int32(m.registers[s])
-
 	if val <= 0 {
 		m.transferControl.takenBranch++
 		loc := int16(m.ir) + int16(immu)
-		printBranch(m.pc, "blez", uint32(loc))
+		printBranch(m.ir, "blez", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
+		printBranchUntaken(m.ir, "blez")
 		m.transferControl.untakenBranch++
 	}
 }
 func bgtz(m *Machine, inst uint32) {
 	s, _, immu := binary.GetIFormat(inst)
 	valu := m.registers[s]
-	val := int32(valu)
+	val := cast.ToInt32(valu)
 
 	if val > 0 {
 		m.transferControl.takenBranch++
-		loc := int16(m.ir) + int16(immu)
-		printBranch(m.pc, "bgtz", uint32(loc))
+		loc := int16(m.pc) + int16(immu)
+		printBranch(m.ir, "bgtz", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
+		printBranchUntaken(m.ir, "bgtz")
 		m.transferControl.untakenBranch++
 	}
 }
@@ -150,26 +157,25 @@ func lw(m *Machine, inst uint32) {
 	m.memoryAccess.load++
 	s, t, imm := binary.GetIFormat(inst)
 	value := m.memory[s+imm]
-	fmt.Printf("%03x: %-5s - register r[%d] now contains 0x%08x\n", m.ir,
-		"lw", t, value)
+	fmt.Printf("%03x: %-5s - register r[%x] now contains 0x%08x\n", m.ir, "lw", t, value)
 	m.registers[t] = m.memory[s+imm]
 }
 func sw(m *Machine, inst uint32) {
 	m.memoryAccess.store++
 	s, t, imm := binary.GetIFormat(inst)
-	fmt.Printf("%03x: %-5s - register r[%d] value stored in memory\n", m.ir, "sw", t)
-	m.memory[s+imm] = m.registers[t]
-
+	fmt.Printf("%03x: %-5s - register r[%x] value stored in memory\n", m.ir, "sw", t)
+	m.memory[s+imm] = uint32(uint16(m.registers[t]))
 }
 func beq(m *Machine, inst uint32) {
 	sr, tr, immu := binary.GetIFormat(inst)
-	s, t := m.memory[sr], m.memory[tr]
+	s, t := m.registers[sr], m.registers[tr]
 	if s == t {
 		m.transferControl.takenBranch++
 		loc := int16(m.ir) + int16(immu)
 		printBranch(m.pc, "beq", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
+		printBranchUntaken(m.ir, "beq")
 		m.transferControl.untakenBranch++
 	}
 }
@@ -228,8 +234,12 @@ func sll(m *Machine, inst uint32) {
 func sra(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	_, tu, du, hu, _ := binary.GetRFormat(inst)
-	sraVal := m.registers[tu] >> m.registers[hu]
-	printInstruction("sll", du, sraVal, m.ir)
+	t := m.registers[tu]
+	mask := uint32(math.Pow(2, float64(hu))-1) << (32 - hu)
+
+	sraVal := (t >> hu) | mask
+
+	printInstruction("sra", du, sraVal, m.ir)
 	m.registers[du] = sraVal
 }
 func srl(m *Machine, inst uint32) {
