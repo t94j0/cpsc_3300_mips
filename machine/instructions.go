@@ -21,27 +21,15 @@ var zeroInstructions = map[uint16]InstructionFunc{
 	0x03: sra, 0x02: srl, 0x23: subu, 0x26: xor,
 }
 
-func printInstruction(instruction string, register uint16, value, pc uint32) {
-	f := "%03x: %-5s - register r[%x] now contains 0x%08x\n"
-	fmt.Printf(f, pc, instruction, register, value)
-}
-func printJump(ir uint32, instruction string, register uint32) {
-	f := "%03x: %-5s - jump to 0x%08x\n"
-	fmt.Printf(f, ir, instruction, register)
-}
-func printBranch(pc uint32, instruction string, register uint32) {
-	f := "%03x: %-5s - branch taken to 0x%08x\n"
-	fmt.Printf(f, pc, instruction, register)
-}
-func printBranchUntaken(pc uint32, instruction string) {
-	f := "%03x: %-5s - branch untaken\n"
-	fmt.Printf(f, pc, instruction)
+func printInstruction(instruction string, ir uint32) {
+	f := "%03x: %-6s"
+	fmt.Printf(f, ir, instruction)
 }
 
 func zeroOpcode(m *Machine, inst uint32) {
 	if inst == 0x0 {
 		m.memoryAccess.instFetch--
-		fmt.Printf("%03x: hlt\n", m.ir)
+		printInstruction("hlt", m.ir)
 		m.halt = true
 		return
 	}
@@ -54,54 +42,53 @@ func zeroOpcode(m *Machine, inst uint32) {
 func j(m *Machine, inst uint32) {
 	m.transferControl.jump++
 	dst := binary.GetJFormat(inst)
-	printJump(m.ir, "j", dst)
+	printInstruction("j", m.ir)
 	m.pc = dst
 }
 func jal(m *Machine, inst uint32) {
 	m.transferControl.jumpLink++
 	dst := binary.GetJFormat(inst)
-	printJump(m.ir, "jal", dst)
+	printInstruction("jal", m.ir)
 	m.registers[31] = m.pc
 	m.pc = dst
 }
 func bne(m *Machine, inst uint32) {
 	sr, tr, immu := binary.GetIFormat(inst)
 	s, t := m.registers[sr], m.registers[tr]
+
+	printInstruction("bne", m.ir)
 	if s != t {
 		m.transferControl.takenBranch++
 		loc := int16(m.pc) + cast.ToInt16(immu)
-		printBranch(m.ir, "bne", uint32(loc))
+
 		m.pc = uint32(loc)
 	} else {
-		printBranchUntaken(m.ir, "bne")
 		m.transferControl.untakenBranch++
 	}
 }
 func blez(m *Machine, inst uint32) {
 	s, _, immu := binary.GetIFormat(inst)
 	val := int32(m.registers[s])
+	printInstruction("blez", m.ir)
 	if val <= 0 {
 		m.transferControl.takenBranch++
 		loc := int16(m.ir) + int16(immu)
-		printBranch(m.ir, "blez", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
-		printBranchUntaken(m.ir, "blez")
 		m.transferControl.untakenBranch++
+
 	}
 }
 func bgtz(m *Machine, inst uint32) {
 	s, _, immu := binary.GetIFormat(inst)
 	valu := m.registers[s]
 	val := cast.ToInt32(valu)
-
+	printInstruction("bgtz", m.ir)
 	if val > 0 {
 		m.transferControl.takenBranch++
 		loc := int16(m.pc) + int16(immu)
-		printBranch(m.ir, "bgtz", uint32(loc))
 		m.pc = uint32(loc)
 	} else {
-		printBranchUntaken(m.ir, "bgtz")
 		m.transferControl.untakenBranch++
 	}
 }
@@ -112,35 +99,39 @@ func addiu(m *Machine, inst uint32) {
 
 	sum := uint32(int32(m.registers[s]) + int32(immCast))
 
-	printInstruction("addiu", t, sum, m.ir)
+	printInstruction("addiu", m.ir)
+	m.writeTo = int(t)
 	m.registers[t] = sum
 }
 func slti(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	su, tu, immu := binary.GetIFormat(inst)
 	s, imm := int32(m.registers[su]), int32(immu)
+	printInstruction("slti", m.ir)
 	if s < imm {
-		printInstruction("slti", tu, 1, m.ir)
+
 		m.registers[tu] = 1
 	} else {
-		printInstruction("slti", tu, 0, m.ir)
 		m.registers[tu] = 0
 	}
+	m.writeTo = int(tu)
 }
 func lui(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	_, tu, imm := binary.GetIFormat(inst)
 	val := cast.ToUint32(imm) << 16
-	printInstruction("lui", tu, uint32(val), m.ir)
+	printInstruction("lui", m.ir)
 	m.registers[tu] = uint32(val)
+	m.writeTo = int(tu)
 }
 func xori(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	su, tu, imm := binary.GetIFormat(inst)
 	s := m.registers[su]
 	xoriVal := s ^ uint32(imm)
-	printInstruction("xori", tu, xoriVal, m.ir)
+	printInstruction("xori", m.ir)
 	m.registers[tu] = xoriVal
+	m.writeTo = int(tu)
 }
 func mul(m *Machine, inst uint32) {
 	m.instructionClass.alu++
@@ -150,32 +141,33 @@ func mul(m *Machine, inst uint32) {
 	}
 	s, t := m.registers[su], m.registers[tu]
 	prod := s * t
-	printInstruction("mul", du, prod, m.ir)
+	printInstruction("mul", m.ir)
 	m.registers[du] = prod
+	m.writeTo = int(du)
 }
 func lw(m *Machine, inst uint32) {
 	m.memoryAccess.load++
 	s, t, imm := binary.GetIFormat(inst)
-	value := m.memory[s+imm]
-	fmt.Printf("%03x: %-5s - register r[%x] now contains 0x%08x\n", m.ir, "lw", t, value)
+	printInstruction("lw", m.ir)
 	m.registers[t] = m.memory[s+imm]
+	m.writeTo = int(t)
 }
 func sw(m *Machine, inst uint32) {
 	m.memoryAccess.store++
 	s, t, imm := binary.GetIFormat(inst)
-	fmt.Printf("%03x: %-5s - register r[%x] value stored in memory\n", m.ir, "sw", t)
+	printInstruction("sw", m.ir)
 	m.memory[s+imm] = uint32(uint16(m.registers[t]))
 }
 func beq(m *Machine, inst uint32) {
 	sr, tr, immu := binary.GetIFormat(inst)
 	s, t := m.registers[sr], m.registers[tr]
+	printInstruction("beq", m.ir)
 	if s == t {
 		m.transferControl.takenBranch++
 		loc := int16(m.ir) + int16(immu)
-		printBranch(m.pc, "beq", uint32(loc))
+
 		m.pc = uint32(loc)
 	} else {
-		printBranchUntaken(m.ir, "beq")
 		m.transferControl.untakenBranch++
 	}
 }
@@ -183,28 +175,31 @@ func addu(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	s, t, d, _, _ := binary.GetRFormat(inst)
 	sum := m.registers[s] + m.registers[t]
-	printInstruction("addu", d, sum, m.ir)
+	printInstruction("addu", m.ir)
 	m.registers[d] = sum
+	m.writeTo = int(d)
 }
 func and(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	su, tu, du, _, _ := binary.GetRFormat(inst)
 	s, t := m.registers[su], m.registers[tu]
 	andVal := s & t
-	printInstruction("and", du, andVal, m.ir)
+	printInstruction("and", m.ir)
 	m.registers[du] = andVal
+	m.writeTo = int(du)
 }
 func jalr(m *Machine, inst uint32) {
 	m.transferControl.jumpLink++
 	s, _, d, _, _ := binary.GetRFormat(inst)
 	m.registers[d] = m.pc
-	printJump(m.ir, "jalr", m.registers[s])
+	printInstruction("jalr", m.ir)
 	m.pc = m.registers[s]
+	m.writeTo = int(d)
 }
 func jr(m *Machine, inst uint32) {
 	m.transferControl.jump++
 	s, _, _, _, _ := binary.GetRFormat(inst)
-	printJump(m.ir, "jr", m.registers[s])
+	printInstruction("jr", m.ir)
 	m.pc = m.registers[s]
 }
 func nor(m *Machine, inst uint32) {
@@ -212,24 +207,27 @@ func nor(m *Machine, inst uint32) {
 	su, tu, du, _, _ := binary.GetRFormat(inst)
 	s, t := m.registers[su], m.registers[tu]
 	norVal := ^(s | t)
-	printInstruction("nor", du, norVal, m.ir)
+	printInstruction("nor", m.ir)
 	m.registers[du] = norVal
+	m.writeTo = int(du)
 }
 func or(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	su, tu, du, _, _ := binary.GetRFormat(inst)
 	s, t := m.registers[su], m.registers[tu]
 	orVal := s | t
-	printInstruction("or", du, orVal, m.ir)
+	printInstruction("or", m.ir)
 	m.registers[du] = orVal
+	m.writeTo = int(du)
 }
 func sll(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	_, tu, du, hu, _ := binary.GetRFormat(inst)
 	t := m.registers[tu]
 	sllVal := t << hu
-	printInstruction("sll", du, sllVal, m.ir)
+	printInstruction("sll", m.ir)
 	m.registers[du] = sllVal
+	m.writeTo = int(du)
 }
 func sra(m *Machine, inst uint32) {
 	m.instructionClass.alu++
@@ -239,29 +237,33 @@ func sra(m *Machine, inst uint32) {
 
 	sraVal := (t >> hu) | mask
 
-	printInstruction("sra", du, sraVal, m.ir)
+	printInstruction("sra", m.ir)
 	m.registers[du] = sraVal
+	m.writeTo = int(du)
 }
 func srl(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	_, tu, du, h, _ := binary.GetRFormat(inst)
 	t := m.registers[tu]
 	srlVal := t >> h
-	printInstruction("srl", du, srlVal, m.ir)
+	printInstruction("srl", m.ir)
 	m.registers[du] = srlVal
+	m.writeTo = int(du)
 }
 func subu(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	s, t, d, _, _ := binary.GetRFormat(inst)
 	diff := m.registers[s] - m.registers[t]
-	printInstruction("subu", d, diff, m.ir)
+	printInstruction("subu", m.ir)
 	m.registers[d] = diff
+	m.writeTo = int(d)
 }
 func xor(m *Machine, inst uint32) {
 	m.instructionClass.alu++
 	su, tu, du, _, _ := binary.GetRFormat(inst)
 	s, t := m.registers[su], m.registers[tu]
 	xorVal := s ^ t
-	printInstruction("xor", du, xorVal, m.ir)
+	printInstruction("xor", m.ir)
 	m.registers[du] = xorVal
+	m.writeTo = int(du)
 }

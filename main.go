@@ -5,15 +5,15 @@ import (
 )
 
 func main() {
-	machine := machine.Machine{}
-	if err := machine.LoadFromStdin(); err != nil {
+	mac := machine.NewMachine()
+	if err := mac.LoadFromStdin(); err != nil {
 		panic(err)
 	}
-	machine.PrintMemory()
-	machine.PrintBehavorialSimulation()
-	machine.Execute()
-	machine.PrintMemory()
-	machine.PrintInstructionClassCounts()
-	machine.PrintMemoryAccessCounts()
-	machine.PrintTransferControlCounts()
+	mac.PrintMemory()
+	mac.PrintBehavorialSimulation()
+	mac.Execute()
+	mac.PrintInstructionClassCounts()
+	mac.PrintMemoryAccessCounts()
+	mac.PrintTransferControlCounts()
+	mac.PrintInstructionPairing()
 }

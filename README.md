@@ -17,31 +17,31 @@ The instructions you should implement are:
 ```
 opcode op/funct  action
   ------ --------  ------
-  addu   0x00/0x21 r[rd]<-r[rs]+r[rt]
-  addiu  0x09/n.a. r[rt]<-r[rs]+sign_ext(immed)
-  and    0x00/0x24 r[rd]<-r[rs]&r[rt]
-  beq    0x04/n.a. if(r[rs]==r[rt]) pc<-pc+sign_ext(immed)
-  bgtz   0x07/n.a. if(signed(r[rs])>0) pc<-pc+sign_ext(immed)
-  blez   0x06/n.a. if(signed(r[rs])<=0) pc<-pc+sign_ext(immed)
-  bne    0x05/n.a. if(r[rs]!=r[rt]) pc<-pc+sign_ext(immed)
-  hlt    all zero (which would be a nop in MIPS)
-  j      0x02/n.a. pc<-target
-  jal    0x03/n.a. r31<-updated_pc; pc<-target
-  jalr   0x00/0x09 r[rd]<-updated_pc; pc<-r[rs]
-  jr     0x00/0x08 pc<-r[rs]
-  lui    0x0f/n.a. r[rt]<-immed<<16
-  lw     0x23/n.a. r[rt]<-mem[r[rs]+sign_ext(immed)]
-  mul    0x1c/0x02 r[rd]<-r[rs]*r[rt]
-  nor    0x00/0x27 r[rd]<-~(r[rs]|r[rt])
-  or     0x00/0x25 r[rd]<-r[rs]|r[rt]
-  sll    0x00/0x00 r[rd]<-r[rt]<<shamt
-  slti   0x0a/n.a. r[rt]<-(signed(r[rs])<sign_ext(immed))?1:0
-  sra    0x00/0x03 r[rd] <- r[rt] >> shamt (sign bit duplicated)
-  srl    0x00/0x02 r[rd]<-r[rt]>>shamt with zero fill
-  subu   0x00/0x23 r[rd]<-r[rs]-r[rt]
-  sw     0x2b/n.a. mem[r[rs]+sign_ext(immed)]<-r[rt]
-  xor    0x00/0x26 r[rd]<-r[rs]^r[rt]
-  xori   0x0e/n.a. r[rt]<-r[rs]^zero_ext(immed)
+  r addu   0x00/0x21 r[rd]<-r[rs]+r[rt]
+  i addiu  0x09/n.a. r[rt]<-r[rs]+sign_ext(immed)
+  r and    0x00/0x24 r[rd]<-r[rs]&r[rt]
+  i beq    0x04/n.a. if(r[rs]==r[rt]) pc<-pc+sign_ext(immed)
+  i bgtz   0x07/n.a. if(signed(r[rs])>0) pc<-pc+sign_ext(immed)
+  i blez   0x06/n.a. if(signed(r[rs])<=0) pc<-pc+sign_ext(immed)
+  i bne    0x05/n.a. if(r[rs]!=r[rt]) pc<-pc+sign_ext(immed)
+  ? hlt    all zero (which would be a nop in MIPS)
+  j j      0x02/n.a. pc<-target
+  j jal    0x03/n.a. r31<-updated_pc; pc<-target
+  r jalr   0x00/0x09 r[rd]<-updated_pc; pc<-r[rs]
+  r jr     0x00/0x08 pc<-r[rs]
+  i lui    0x0f/n.a. r[rt]<-immed<<16
+  i lw     0x23/n.a. r[rt]<-mem[r[rs]+sign_ext(immed)]
+  r mul    0x1c/0x02 r[rd]<-r[rs]*r[rt]
+  r nor    0x00/0x27 r[rd]<-~(r[rs]|r[rt])
+  r or     0x00/0x25 r[rd]<-r[rs]|r[rt]
+  r sll    0x00/0x00 r[rd]<-r[rt]<<shamt
+  i slti   0x0a/n.a. r[rt]<-(signed(r[rs])<sign_ext(immed))?1:0
+  r sra    0x00/0x03 r[rd] <- r[rt] >> shamt (sign bit duplicated)
+  r srl    0x00/0x02 r[rd]<-r[rt]>>shamt with zero fill
+  r subu   0x00/0x23 r[rd]<-r[rs]-r[rt]
+  i sw     0x2b/n.a. mem[r[rs]+sign_ext(immed)]<-r[rt]
+  r xor    0x00/0x26 r[rd]<-r[rs]^r[rt]
+  i xori   0x0e/n.a. r[rt]<-r[rs]^zero_ext(immed)
 ```
 
 The instruction classifications are:
